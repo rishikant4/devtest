@@ -84,7 +84,7 @@ pipeline {
                 }
             }
         } 
-        stage('Ansible & Terraform provisoining') {
+       /* stage('Ansible & Terraform provisoining') {
             steps {
                 script {
                         !/bin/bash
@@ -100,6 +100,6 @@ pipeline {
                         terraform $TERRAFORM_ACTION -auto-approve
                 }
             }
-        }
+        }*/
     }
 }
