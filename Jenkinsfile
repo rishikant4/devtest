@@ -62,7 +62,6 @@ pipeline {
                 script {
                     
                     def mavenpom = readMavenPom file: 'pom.xml'
-                    def nex_repo = mavenpom.version.endsWith('SNAPSHOT') ? 'demoproject-snapshot' : 'demoproject-Release'
                     nexusArtifactUploader artifacts: [
                     [
                         artifactId: 'Java_app',
@@ -76,7 +75,7 @@ pipeline {
                     nexusUrl: "${env.nex_url}",
                     nexusVersion: "${env.nex_ver}",
                     protocol: "${env.proto}",
-                    repository: "${nex_repo}",
+                    repository: 'demoproject-Release',
                     version: "${mavenpom.version}"
                     echo 'Artifact uploaded to nexus repository'
                 }
