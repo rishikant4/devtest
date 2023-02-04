@@ -1,17 +1,17 @@
-/* groovylint-disable-next-line LineLength */
-/* groovylint-disable CompileStatic, DuplicateStringLiteral, NestedBlockDepth, UnusedVariable, VariableName, VariableTypeRequired */
 pipeline {
     agent any
     environment {
-        def git_branch = 'main'
-        def git_url = 'https://github.com/avidere/helloworldtest.git'
+        def git_branch = 'master'
+        def git_url = 'https://github.com/rishikant4/devtest.git'
 
         def mvntest = 'mvn test '
         def mvnpackage = 'mvn clean install'
 
         def sonar_cred = 'sonar'
         def code_analysis = 'mvn clean install sonar:sonar'
+        
         def utest_url = 'target/surefire-reports/**/*.xml'
+        
         def nex_cred = 'nexus'
         def grp_ID = 'com.example'
         def nex_url = '172.31.28.226:8081'
@@ -81,17 +81,7 @@ pipeline {
                     echo 'Artifact uploaded to nexus repository'
                 }
             }
-        } /*
-        stage('Download Artifact and Deploy on tomcat server using Ansible'){
-            steps{
-
-                 sshagent(['Ansible-server']) {
-                    script{
-                    sh 'ansiblePlaybook credentialsId: 'Ansible-server', installation: 'Ansible', inventory: '/Ansible-integration/inventory.yaml', playbook: '/Ansible-integration/tomcat.yaml', sudo: true, sudoUser: 'devops''
-                    }
-                 }
-            }
-        } */
+        } 
     }
 }
 
