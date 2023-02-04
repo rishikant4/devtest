@@ -17,6 +17,9 @@ pipeline {
         def nex_url = '43.204.140.112:8081'
         def nex_ver = 'nexus3'
         def proto = 'http'
+        
+        def SERVER_NAME= 'tomcat'
+        def TERRAFORM_ACTION= 'apply'
     }
     stages {
         stage('Git Checkout') {
