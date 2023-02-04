@@ -75,7 +75,7 @@ pipeline {
                     nexusUrl: "${env.nex_url}",
                     nexusVersion: "${env.nex_ver}",
                     protocol: "${env.proto}",
-                    repository: 'demoproject-Release',
+                    repository: 'my_repo',
                     version: "${mavenpom.version}"
                     echo 'Artifact uploaded to nexus repository'
                 }
