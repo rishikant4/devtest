@@ -44,17 +44,11 @@
       copy:
         src: context.xml
         dest: /usr/local/apache-tomcat-{{req_tomcat_ver}}/webapps/manager/META-INF
-    # Download war files from git
-    - name: download war file
-      git:
-        repo: https://github.com/sugreevudu/docker.git
-        dest: /tmp/webapps
-    # Copy app folder in webapps directory
-    - name: copy the war file
-      copy:
-        src: /tmp/webapps/target/petclinic
-        dest: /usr/local/apache-tomcat-{{req_tomcat_ver}}/webapps/
-        remote_src: yes
+    # Download war files from nexus
+    - name: download artifact from nexus server
+      get_url:
+        url: http://35.76.123.24:8081/repository/tomcat-SNAPSHOT/com/example/helloworld/1.0-SNAPSHOT/helloworld-1.0-20221227.115435-28.war
+        dest: /opt/tomcat/apache-tomcat-10.0.8/webapps
     # shutdown and start tomcat
     - name: starting tomcat
       shell: /usr/local/apache-tomcat-{{req_tomcat_ver}}/bin/shutdown.sh && nohup /usr/local/apache-tomcat-{{req_tomcat_ver}}/bin/startup.sh
