@@ -53,7 +53,7 @@
     # Download war files from nexus
     - name: download artifact from nexus server
       get_url:
-        url: http://35.76.123.24:8081/repository/tomcat-SNAPSHOT/com/example/helloworld/1.0-SNAPSHOT/helloworld-1.0-20221227.115435-28.war
+        url: http://35.154.187.118:8081/repository/my_repo/com/example/Java_app/0-SNAPSHOT/Java_app-0-20230204.174314-2.war
         dest: /opt/tomcat/apache-tomcat-10.0.8/webapps
     # shutdown and start tomcat
     - name: starting tomcat
