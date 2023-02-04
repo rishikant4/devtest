@@ -65,9 +65,9 @@ pipeline {
                     def nex_repo = mavenpom.version.endsWith('SNAPSHOT') ? 'demoproject-snapshot' : 'demoproject-Release'
                     nexusArtifactUploader artifacts: [
                     [
-                        artifactId: 'HelloWorld',
+                        artifactId: 'Java_app',
                         classifier: '',
-                        file: "target/HelloWorld-${mavenpom.version}.war",
+                        file: "target/Java_app-${mavenpom.version}.war",
                         type: 'war'
                     ]
                 ],
