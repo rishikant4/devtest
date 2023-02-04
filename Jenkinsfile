@@ -87,7 +87,7 @@ pipeline {
         stage('Ansible & Terraform provisoining') {
             steps {
                 script {
-                        #!/bin/bash
+                        !/bin/bash
                         set -xe
 
                         cd Terraform
