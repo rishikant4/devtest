@@ -66,7 +66,7 @@ pipeline {
                     [
                         artifactId: 'Java_app',
                         classifier: '',
-                        file: "target/Java_app-${mavenpom.version}.war",
+                        file: "target/Java_app.war",
                         type: 'war'
                     ]
                 ],
