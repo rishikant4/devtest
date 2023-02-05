@@ -8,7 +8,7 @@
     ansible_ssh_user: "ec2-user"
   tasks:
     - name: Update the System Packages
-      apt:
+      yum:
         upgrade: yes
         update_cache: yes
  
@@ -21,7 +21,7 @@
         name: tomcat
  
     - name: Install JAVA
-      apt:
+      yum:
         name: default-jdk
         state: present
  
