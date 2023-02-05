@@ -99,16 +99,23 @@ pipeline {
                         terraform init
                         terraform plan
                         terraform $TERRAFORM_ACTION -auto-approve
-                        
-                        if [ $TERRAFORM_ACTION = "destroy" ]; then
+                     '''
+                }
+            }
+        }
+	    stage('Ansible provisoining') {
+      steps {
+        retry(count: 5) {
+          sh '''
+	  		if [ $TERRAFORM_ACTION = "destroy" ]; then
                                 exit 0
                         else
 	                            cd ../Ansible
 	                            ansible-playbook -i /opt/ansible/inventory/aws_ec2.yaml tomcat.yaml 
                         fi
-                     '''
-                }
-            }
+	    '''
         }
+      }
+    }
     }
 }
