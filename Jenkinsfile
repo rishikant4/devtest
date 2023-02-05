@@ -106,14 +106,7 @@ pipeline {
 	    stage('Ansible provisoining') {
       steps {
         retry(count: 5) {
-          sh '''
-	  		if [ $TERRAFORM_ACTION = "destroy" ]; then
-                                exit 0
-                        else
-	                            cd ../Ansible
-	                            ansible-playbook -i /opt/ansible/inventory/aws_ec2.yaml tomcat.yaml 
-                        fi
-	    '''
+         sh 'ansible-playbook -i /etc/ansible/aws_ec2.yaml Ansible/tomcat.yaml'
         }
       }
     }
