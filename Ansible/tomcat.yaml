@@ -1,66 +1,95 @@
 ---
   - name: install and configure tomcat
     hosts: aws_ec2
-    gather_facts: false
     become: yes
     remote_user: ec2-user
     vars:
       ansible_ssh_private_key_file: "/etc/ansible/jen.pem"  
       ansible_ssh_user: "ec2-user"
+      download_url: https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.83/bin/apache-tomcat-8.5.83.tar.gz
     tasks:
-    - name: Update the System Packages
-      apt:
-        upgrade: yes
-        update_cache: yes
- 
-    - name: Create a Tomcat User
-      user:
+   - name: Download Open JDK
+     become: yes
+     apt:
+      name: openjdk-8-jre-headless
+      update_cache: yes
+      state: present
+  
+   - name: validate if Java is availble 
+     shell: 
+      java -version
+     
+   - name: Create the group
+     become: yes
+     group: 
+      name: tomcat
+      state: present
+   - name: Create the user
+     become: yes
+     user:
         name: tomcat
- 
-    - name: Create a Tomcat Group
-      group:
-        name: tomcat
- 
-    - name: Install JAVA
-      apt:
-        name: default-jdk
         state: present
- 
- 
-    - name: Create a Tomcat Directory
-      file:
-        path: /opt/tomcat10
-        owner: tomcat
-        group: tomcat
-        mode: 755
-        recurse: yes
- 
-    - name: download & unarchive tomcat10 
-      unarchive:
-        src: https://mirrors.estointernet.in/apache/tomcat/tomcat-10/v10.0.4/bin/apache-tomcat- 10.0.4.tar.gz
-        dest: /opt/tomcat10
-        remote_src: yes
-        extra_opts: [--strip-components=1]
-    - name: Change ownership of tomcat directory
-      file:
-        path: /opt/tomcat10
-        owner: tomcat
-        group: tomcat
-        mode: "u+rwx,g+rx,o=rx"
-        recurse: yes
-        state: directory
- 
-    - name: Copy Tomcat service from local to remote
-      copy:
-        src: /etc/tomcat.service
-        dest: /etc/systemd/system/
-        mode: 0755
- 
-    - name: Start and Enable Tomcat 10 on sever
-      systemd:
+   - name: Create a Directory /opt/tomcat8
+     become: yes
+     file:
+       path: /opt/tomcat8
+       state: directory
+       mode: 0755
+       owner: tomcat
+       group: tomcat
+   - name: Download Tomcat using unarchive
+     become: yes
+     unarchive:
+       src: "{{download_url}}"
+       dest: /opt/tomcat8
+       mode: 0755
+       remote_src: yes
+       group: tomcat
+       owner: tomcat
+    
+   - name: Move files to the /opt/tomcat8 directory
+     become: yes
+     become_user: tomcat
+     shell: "mv /opt/tomcat8/apache*/* /opt/tomcat8"
+   - name: Creating a service file
+     become: yes
+     copy: 
+      content: |-
+        [Unit]
+        Description=Tomcat Service
+        Requires=network.target
+        After=network.target
+        [Service]
+        Type=forking
+        User=tomcat
+        Environment="CATALINA_PID=/opt/tomcat8/logs/tomcat.pid"
+        Environment="CATALINA_BASE=/opt/tomcat8"
+        Environment="CATALINA_HOME=/opt/tomcat8"
+        Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+        ExecStart=/opt/tomcat8/bin/startup.sh
+        ExecStop=/opt/tomcat8/bin/shutdown.sh
+        Restart=on-abnormal
+        [Install]
+        WantedBy=multi-user.target
+      dest: /etc/systemd/system/tomcat.service
+   - name: Reload the SystemD to re-read configurations
+     become: yes
+     systemd:
+        daemon-reload: yes
+   - name: Enable the tomcat service and start
+     become: yes
+     systemd:
         name: tomcat
+        enabled: yes
         state: started
-        daemon_reload: true
+   - name: Connect to Tomcat server on port 8080 and check status 200 - Try 5 times
+     tags: test
+     uri:
+       url: http://localhost:8080
+     register: result
+     until: "result.status == 200"
+     retries: 5
+     delay: 10
     # Terraform install
     - name: terraform install
       unarchive:
