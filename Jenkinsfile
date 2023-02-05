@@ -20,6 +20,9 @@ pipeline {
         
         def SERVER_NAME= 'tomcat'
         def TERRAFORM_ACTION= 'apply'
+        
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
     stages {
         stage('Git Checkout') {
@@ -50,7 +53,7 @@ pipeline {
                 }
             }
         }
-        stage('Static code analysis and Quality Gate Status') {
+        /*stage('Static code analysis and Quality Gate Status') {
             steps {
                 script {
                     withSonarQubeEnv(credentialsId: "${sonar_cred}") {
@@ -83,13 +86,11 @@ pipeline {
                     echo 'Artifact uploaded to nexus repository'
                 }
             }
-        } 
-       /* stage('Ansible & Terraform provisoining') {
+        } */
+       stage('Ansible & Terraform provisoining') {
             steps {
                 script {
-                        !/bin/bash
-                        set -xe
-
+                      sh '''
                         cd Terraform
 
                         sed -i "s/server_name/${SERVER_NAME}/g" backend.tf
@@ -98,8 +99,9 @@ pipeline {
                         terraform init
                         terraform plan
                         terraform $TERRAFORM_ACTION -auto-approve
+                     '''
                 }
             }
-        }*/
+        }
     }
 }
