@@ -1,103 +1,63 @@
 ---
   - name: install and configure tomcat
     hosts: aws_ec2
-    become: yes
+    gather_facts: false
     remote_user: ec2-user
+    become: yes
     vars:
       ansible_ssh_private_key_file: "/etc/ansible/jen.pem"  
       ansible_ssh_user: "ec2-user"
-      download_url: https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.83/bin/apache-tomcat-8.5.83.tar.gz
+      req_tomcat_ver: 8.5.0
+      req_port: 8888
+      tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-{{req_tomcat_ver.split('.')[0]}}/v{{req_tomcat_ver}}/bin/apache-tomcat-{{req_tomcat_ver}}.tar.gz
     tasks:
-    - name: Download Open JDK
-      become: yes
-      apt:
-       name: openjdk-8-jre-headless
-       update_cache: yes
-       state: present
-  
-    - name: validate if Java is availble 
-      shell: 
-       java -version
-     
-    - name: Create the group
-      become: yes
-      group: 
-       name: tomcat
-       state: present
-    - name: Create the user
-      become: yes
-      user:
-        name: tomcat
-        state: present
-    - name: Create a Directory /opt/tomcat8
-      become: yes
-      file:
-       path: /opt/tomcat8
-       state: directory
-       mode: 0755
-       owner: tomcat
-       group: tomcat
-    - name: Download Tomcat using unarchive
-      become: yes
-      unarchive:
-       src: "{{download_url}}"
-       dest: /opt/tomcat8
-       mode: 0755
-       remote_src: yes
-       group: tomcat
-       owner: tomcat
-    
-    - name: Move files to the /opt/tomcat8 directory
-      become: yes
-      become_user: tomcat
-      shell: "mv /opt/tomcat8/apache*/* /opt/tomcat8"
-    - name: Creating a service file
-      become: yes
-      copy: 
-      content: |-
-        [Unit]
-        Description=Tomcat Service
-        Requires=network.target
-        After=network.target
-        [Service]
-        Type=forking
-        User=tomcat
-        Environment="CATALINA_PID=/opt/tomcat8/logs/tomcat.pid"
-        Environment="CATALINA_BASE=/opt/tomcat8"
-        Environment="CATALINA_HOME=/opt/tomcat8"
-        Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
-        ExecStart=/opt/tomcat8/bin/startup.sh
-        ExecStop=/opt/tomcat8/bin/shutdown.sh
-        Restart=on-abnormal
-        [Install]
-        WantedBy=multi-user.target
-      dest: /etc/systemd/system/tomcat.service
-    - name: Reload the SystemD to re-read configurations
-      become: yes
-      systemd:
-        daemon-reload: yes
-    - name: Enable the tomcat service and start
-      become: yes
-      systemd:
-        name: tomcat
-        enabled: yes
-        state: started
-    - name: Connect to Tomcat server on port 8080 and check status 200 - Try 5 times
-      tags: test
-      uri:
-       url: http://localhost:8080
-      register: result
-      until: "result.status == 200"
-      retries: 5
-      delay: 10
-    # Terraform install
-    - name: terraform install
-      unarchive:
-        src: https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_linux_amd64.zip
-        dest: /usr/bin
-        remote_src: yes
-    # Download war files from nexus
-    - name: download artifact from nexus server
+    # update packages
+    - name: updating repos
+      yum:
+        update_cache: yes
+        cache_valid_time: 3600
+    # Install java
+    - name: Installating java
+      yum: name=default-jdk state=latest
+    # Download tomcat tar file
+    - name: downloading required tomcat
       get_url:
-        url: http://35.154.187.118:8081/repository/my_repo/com/example/Java_app/0-SNAPSHOT/Java_app-0-20230204.174314-2.war
-        dest: /opt/tomcat/apache-tomcat-10.0.8/webapps
+        url: "{{tomcat_url}}"
+        dest: /usr/local
+    # Extract tomcat tar file
+    - name: extract downloading tomcat
+      unarchive:
+        src: "/usr/local/apache-tomcat-{{req_tomcat_ver}}.tar.gz"
+        dest: /usr/local
+        remote_src: yes
+    # copy tomcat-users.xml file
+    - name: copy the files
+      copy:
+        src: tomcatusers.xml
+        dest: /usr/local/apache-tomcat-{{req_tomcat_ver}}/conf/tomcat-users.xml
+    # Change default port in server.xml
+    - name: change port no
+      lineinfile:
+        path: /usr/local/apache-tomcat-{{req_tomcat_ver}}/conf/server.xml
+        regexp: '<Connector port="8080" protocol="HTTP/1.1"'
+        line: ' <Connector port="8888" protocol="HTTP/1.1"'
+        remote_src: yes
+    # Copy context.xml file
+    - name: copy the context file
+      copy:
+        src: context.xml
+        dest: /usr/local/apache-tomcat-{{req_tomcat_ver}}/webapps/manager/META-INF
+    # Download war files from git
+    - name: download war file
+      git:
+        repo: https://github.com/sugreevudu/docker.git
+        dest: /tmp/webapps
+    # Copy app folder in webapps directory
+    - name: copy the war file
+      copy:
+        src: /tmp/webapps/target/petclinic
+        dest: /usr/local/apache-tomcat-{{req_tomcat_ver}}/webapps/
+        remote_src: yes
+    # shutdown and start tomcat
+    - name: starting tomcat
+      shell: /usr/local/apache-tomcat-{{req_tomcat_ver}}/bin/shutdown.sh && nohup /usr/local/apache-tomcat-{{req_tomcat_ver}}/bin/startup.sh
