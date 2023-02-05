@@ -1,74 +1,33 @@
 ---
-  - name: install and configure tomcat
-    hosts: aws_ec2
-    gather_facts: false
-    become: yes
-    remote_user: ec2-user
-    vars:
-      ansible_ssh_private_key_file: "/etc/ansible/jen.pem"  
-      ansible_ssh_user: "ec2-user"
-    tasks:
-    - name: Update the System Packages
-      apt:
-        upgrade: yes
-        update_cache: yes
- 
-    - name: Create a Tomcat User
-      user:
-        name: tomcat
- 
-    - name: Create a Tomcat Group
-      group:
-        name: tomcat
- 
-    - name: Install JAVA
-      apt:
-        name: default-jdk
+- name: This sets up an httpd webserver
+  hosts: aws_ec2
+  become: yes
+  remote_user: ec2-user
+  gather_facts: true
+  vars:
+    ansible_ssh_private_key_file: "/etc/ansible/jen.pem"  
+    ansible_ssh_user: "ec2-user"
+  tasks:
+  - name: "Install httpd and php packages"
+    package:
+        name:
+          - "httpd"
+          - "php"
         state: present
- 
- 
-    - name: Create a Tomcat Directory
-      file:
-        path: /opt/tomcat10
-        owner: tomcat
-        group: tomcat
-        mode: 755
-        recurse: yes
- 
-    - name: download & unarchive tomcat10 
-      unarchive:
-        src: https://mirrors.estointernet.in/apache/tomcat/tomcat-10/v10.0.4/bin/apache-tomcat- 10.0.4.tar.gz
-        dest: /opt/tomcat10
-        remote_src: yes
-        extra_opts: [--strip-components=1]
-    - name: Change ownership of tomcat directory
-      file:
-        path: /opt/tomcat10
-        owner: tomcat
-        group: tomcat
-        mode: "u+rwx,g+rx,o=rx"
-        recurse: yes
-        state: directory
- 
-    - name: Copy Tomcat service from local to remote
-      copy:
-        src: /etc/tomcat.service
-        dest: /etc/systemd/system/
-        mode: 0755
- 
-    - name: Start and Enable Tomcat 10 on sever
-      systemd:
-        name: tomcat
+  - name: "copy code from GitHub"
+    get_url:
+        url: https://www.shubhammishra.in
+        dest: "/var/www/html/index.php"
+  - name: "Start httpd services"
+    service:
+        name: httpd
         state: started
-        daemon_reload: true
-    # Terraform install
-    - name: terraform install
-      unarchive:
-        src: https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_linux_amd64.zip
-        dest: /usr/bin
-        remote_src: yes
-    # Download war files from nexus
-    - name: download artifact from nexus server
-      get_url:
-        url: http://35.154.187.118:8081/repository/my_repo/com/example/Java_app/0-SNAPSHOT/Java_app-0-20230204.174314-2.war
-        dest: /opt/tomcat/apache-tomcat-10.0.8/webapps
+  - name: Yum Install Packages
+    yum: name={{item}} state=latest
+    with_items:
+       - wget
+  - name: terraform install
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_linux_amd64.zip
+      dest: /usr/bin
+      remote_src: True
