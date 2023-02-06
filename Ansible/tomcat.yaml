@@ -13,12 +13,12 @@
     tasks:
     # update packages
     - name: updating repos
-      apt:
+      yum:
         update_cache: yes
         cache_valid_time: 3600
     # Install java
     - name: Installating java
-      apt: name=default-jdk state=latest
+      yum: name=default-jdk state=latest
     # Download tomcat tar file
     - name: downloading required tomcat
       get_url:
