@@ -1,10 +1,10 @@
-data "aws_ami" "ubuntu-linux-1404" {
+data "aws_ami" "server_ami" {
   most_recent = true
   owners      = ["099720109477"]
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 
   filter {
@@ -14,7 +14,7 @@ data "aws_ami" "ubuntu-linux-1404" {
 }
 
 resource "aws_instance" "dev_machine" {
-  ami = data.aws_ami.ubuntu-linux-1404.id
+  ami = data.aws_ami.server_ami.id
   instance_type = "t2.micro"
   key_name = "jen"
 
