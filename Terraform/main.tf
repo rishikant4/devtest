@@ -1,5 +1,6 @@
-data "aws_ami" "amazon-linux" {
+data "aws_ami" "ubuntu-linux-1404" {
   most_recent = true
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
@@ -13,7 +14,7 @@ data "aws_ami" "amazon-linux" {
 }
 
 resource "aws_instance" "dev_machine" {
-  ami = data.aws_ami.amazon-linux.id
+  ami = data.aws_ami.ubuntu-linux-1404.id
   instance_type = "t2.micro"
   key_name = "jen"
 
