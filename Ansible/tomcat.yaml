@@ -7,9 +7,9 @@
     vars:
       ansible_ssh_private_key_file: "/etc/ansible/jen.pem"  
       ansible_ssh_user: "ec2-user"
-      req_tomcat_ver: 8.5.0
+      req_tomcat_ver: 10.1.5
       req_port: 8888
-      tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-{{req_tomcat_ver.split('.')[0]}}/v{{req_tomcat_ver}}/bin/apache-tomcat-{{req_tomcat_ver}}.tar.gz
+      tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.5/bin/apache-tomcat-10.1.5.tar.gz
     tasks:
     # Download tomcat tar file
     - name: downloading required tomcat
