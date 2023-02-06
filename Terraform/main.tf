@@ -1,10 +1,9 @@
-data "aws_ami" "server_ami" {
+data "aws_ami" "amazon-linux" {
   most_recent = true
-  owners      = ["099720109477"]
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = ["amzn2-ami-kernel-5.10-hvm-*-x86_64-gp2"]
   }
 
   filter {
@@ -14,7 +13,7 @@ data "aws_ami" "server_ami" {
 }
 
 resource "aws_instance" "dev_machine" {
-  ami = data.aws_ami.server_ami.id
+  ami = data.aws_ami.amazon-linux.id
   instance_type = "t2.micro"
   key_name = "jen"
 
