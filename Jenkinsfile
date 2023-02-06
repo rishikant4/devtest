@@ -106,7 +106,7 @@ pipeline {
 	    stage('Ansible provisoining') {
       steps {
         retry(count: 5) {
-         sh 'ansible-playbook -i /opt/ansible/inventory/aws_ec2.yaml Ansible/tomcat.yaml -e ansible_python_interpreter=/usr/bin/python --check'
+         sh 'ansible-playbook -i /opt/ansible/inventory/aws_ec2.yaml Ansible/tomcat.yaml'
         }
       }
     }
