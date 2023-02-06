@@ -87,7 +87,7 @@ pipeline {
                 }
             }
         } */
-       stage('Ansible & Terraform provisoining') {
+       stage('Terraform provisioning') {
             steps {
                 script {
                       sh '''
@@ -103,7 +103,7 @@ pipeline {
                 }
             }
         }
-	    stage('Ansible provisoining') {
+	    stage('Ansible provisioning & Deploy') {
       steps {
         retry(count: 5) {
          sh 'ansible-playbook -i /opt/ansible/inventory/aws_ec2.yaml Ansible/tomcat.yaml'
