@@ -14,7 +14,7 @@ pipeline {
         
         def nex_cred = 'nexus'
         def grp_ID = 'com.example'
-        def nex_url = '35.154.187.118:8081'
+        def nex_url = '65.1.3.47:8081'
         def nex_ver = 'nexus3'
         def proto = 'http'
         
@@ -53,7 +53,7 @@ pipeline {
                 }
             }
         }
-        /*stage('Static code analysis and Quality Gate Status') {
+        stage('Static code analysis and Quality Gate Status') {
             steps {
                 script {
                     withSonarQubeEnv(credentialsId: "${sonar_cred}") {
@@ -86,7 +86,7 @@ pipeline {
                     echo 'Artifact uploaded to nexus repository'
                 }
             }
-        } */
+        } 
        stage('Terraform provisioning') {
             steps {
                 script {
