@@ -16,7 +16,7 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v2
       with:
-        java-version: 14
+        java-version: 1.8
 
     - name: Build with Maven
       uses: actions/maven@v3
