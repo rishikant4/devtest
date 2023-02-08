@@ -1,0 +1,25 @@
+name: CI/CD workflow
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: 14
+
+    - name: Build with Maven
+      uses: actions/maven@v2
+      with:
+        maven-version: 3.6.3
+        goals: clean package
