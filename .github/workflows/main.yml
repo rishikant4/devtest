@@ -19,7 +19,7 @@ jobs:
         java-version: 14
 
     - name: Build with Maven
-      uses: actions/maven@v2
+      uses: actions/maven@v3
       with:
         maven-version: 3.6.3
         goals: clean package
